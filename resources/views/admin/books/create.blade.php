@@ -72,7 +72,7 @@
                             Pilih kategori
                         </option>
 
-                        @foreach($categories as $category)
+                        @foreach ($categories as $category)
 
                             <option
                                 value="{{ $category->id }}"
@@ -184,6 +184,40 @@
                         required
                         class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
                     >
+
+                </div>
+
+                <div>
+
+                    <label class="block font-semibold mb-2">
+                        Lokasi Rak
+                    </label>
+
+                    <select
+                        name="rack_location"
+                        class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+
+                        <option value="">
+                            Pilih lokasi rak
+                        </option>
+
+                        @foreach ($rackLocations as $value => $label)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(old('rack_location') === $value)
+                            >
+                                {{ $label }}
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                    <p class="text-xs text-slate-500 mt-2">
+                        Pilih rak tempat buku disimpan. Lokasi bisa diubah melalui menu Edit Buku.
+                    </p>
 
                 </div>
 

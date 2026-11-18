@@ -110,13 +110,57 @@
 
                 <div>
                     <p class="text-xs text-slate-400">
-                        Email
+                        NIS / Email
                     </p>
 
                     <p class="mt-1 font-semibold text-slate-800">
-                        {{ $loan->user->email }}
+                        {{ $loan->user->identifier }}
                     </p>
                 </div>
+
+                @if ($loan->user->student)
+                    <div>
+                        <p class="text-xs text-slate-400">
+                            Kelas
+                        </p>
+
+                        <p class="mt-1 font-semibold text-slate-800">
+                            {{ $loan->user->student->class_name }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-slate-400">
+                            Wali Kelas
+                        </p>
+
+                        <p class="mt-1 font-semibold text-slate-800">
+                            {{ $loan->user->student->homeroom_teacher ?: '-' }}
+                        </p>
+                    </div>
+                @endif
+
+                @if ($loan->user->staff)
+                    <div>
+                        <p class="text-xs text-slate-400">
+                            Jabatan
+                        </p>
+
+                        <p class="mt-1 font-semibold text-slate-800">
+                            {{ $loan->user->staff->position }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-slate-400">
+                            Unit / Mapel
+                        </p>
+
+                        <p class="mt-1 font-semibold text-slate-800">
+                            {{ $loan->user->staff->unit ?: '-' }}
+                        </p>
+                    </div>
+                @endif
 
             </div>
 
@@ -209,16 +253,14 @@
                             @if ($detail->book->cover)
 
                                 <img
-                                    src="{{ asset('storage/' . $detail->book->cover) }}"
+                                    src="{{ asset(str_starts_with($detail->book->cover, 'uploads/') ? $detail->book->cover : 'storage/' . $detail->book->cover) }}"
                                     alt="{{ $detail->book->title }}"
                                     class="h-full w-full object-cover"
                                 >
 
                             @else
 
-                                <div class="flex h-full items-center justify-center text-2xl">
-                                    📚
-                                </div>
+                                <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
 
                             @endif
 
@@ -267,32 +309,61 @@
         {{-- Bukti --}}
         <div class="mb-6 grid gap-6 md:grid-cols-2">
 
-            {{-- Borrowing --}}
+            {{-- Kode Peminjaman (invoice) --}}
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 
                 <h2 class="font-bold text-slate-900">
-                    Bukti Peminjaman
+                    Kode Peminjaman
                 </h2>
+
+                <div class="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+
+                    <div class="shrink-0 rounded-xl border border-slate-200 bg-white p-2">
+                        <div id="admin-loan-qr" class="flex h-[132px] w-[132px] items-center justify-center"></div>
+                    </div>
+
+                    <div class="min-w-0 text-center sm:text-left">
+
+                        <p class="text-xs text-slate-400">
+                            Kode yang ditunjukkan siswa
+                        </p>
+
+                        <p class="mt-1 break-all font-mono text-xl font-extrabold tracking-wider text-slate-900">
+                            {{ $loan->loan_code }}
+                        </p>
+
+                        <a
+                            href="{{ route('admin.loans.scan') }}"
+                            class="mt-3 inline-flex text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+                        >
+                            Scan kode lain →
+                        </a>
+
+                    </div>
+
+                </div>
 
                 @if ($loan->borrowing_proof)
 
-                    <a
-                        href="{{ asset('storage/' . $loan->borrowing_proof) }}"
-                        target="_blank"
-                        class="mt-4 block overflow-hidden rounded-xl"
-                    >
-                        <img
-                            src="{{ asset('storage/' . $loan->borrowing_proof) }}"
-                            alt="Bukti Peminjaman"
-                            class="max-h-80 w-full object-cover transition hover:scale-[1.01]"
+                    <div class="mt-5 border-t border-slate-100 pt-4">
+
+                        <p class="text-xs font-semibold text-slate-500">
+                            Foto bukti lama (sebelum fitur invoice)
+                        </p>
+
+                        <a
+                            href="{{ asset('storage/' . $loan->borrowing_proof) }}"
+                            target="_blank"
+                            class="mt-2 block overflow-hidden rounded-xl"
                         >
-                    </a>
+                            <img
+                                src="{{ asset('storage/' . $loan->borrowing_proof) }}"
+                                alt="Bukti Peminjaman"
+                                class="max-h-60 w-full object-cover transition hover:scale-[1.01]"
+                            >
+                        </a>
 
-                @else
-
-                    <p class="mt-4 text-sm text-slate-500">
-                        Tidak ada bukti peminjaman.
-                    </p>
+                    </div>
 
                 @endif
 
@@ -323,9 +394,7 @@
 
                     <div class="mt-4 rounded-xl bg-slate-50 p-6 text-center">
 
-                        <div class="text-3xl">
-                            📷
-                        </div>
+                        <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 9"/></svg>
 
                         <p class="mt-2 text-sm text-slate-500">
                             Bukti pengembalian belum tersedia.
@@ -365,36 +434,57 @@
 
             <div class="mt-4">
 
-                {{-- Pending --}}
+                {{-- Pending: ceklis serah-terima lalu langsung berstatus dipinjam --}}
                 @if ($loan->status === 'pending')
 
-                    <div class="flex flex-wrap gap-3">
+                    <form
+                        action="{{ route('admin.loans.approve', $loan) }}"
+                        method="POST"
+                        data-handover
+                        class="space-y-4"
+                    >
+                        @csrf
 
-                        <form
-                            action="{{ route('admin.loans.approve', $loan) }}"
-                            method="POST"
-                        >
-                            @csrf
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <input
+                                type="checkbox"
+                                name="handed_over"
+                                value="1"
+                                class="mt-0.5 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                            >
+
+                            <span>
+                                <span class="block font-semibold text-slate-800">
+                                    Buku sudah diserahkan kepada siswa
+                                </span>
+                                <span class="block text-sm text-slate-500">
+                                    Setelah dicentang dan disetujui, status langsung menjadi
+                                    "Sedang Dipinjam", stok dikurangi, dan masa pinjam dihitung
+                                    mulai hari ini.
+                                </span>
+                            </span>
+                        </label>
+
+                        <div class="flex flex-wrap gap-3">
 
                             <button
                                 type="submit"
-                                class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
-                                onclick="return confirm('Yakin ingin menyetujui peminjaman ini?')"
+                                class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
                             >
-                                ✓ Setujui Peminjaman
+                                Setujui &amp; Tandai Dipinjam
                             </button>
 
-                        </form>
+                            <button
+                                type="button"
+                                onclick="document.getElementById('rejectModal').classList.remove('hidden')"
+                                class="rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700"
+                            >
+                                Tolak Peminjaman
+                            </button>
 
-                        <button
-                            type="button"
-                            onclick="document.getElementById('rejectModal').classList.remove('hidden')"
-                            class="rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700"
-                        >
-                            ✕ Tolak Peminjaman
-                        </button>
+                        </div>
 
-                    </div>
+                    </form>
 
                 {{-- Approved --}}
                 @elseif ($loan->status === 'approved')
@@ -410,7 +500,7 @@
                             class="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
                             onclick="return confirm('Tandai buku sudah diserahkan kepada siswa?')"
                         >
-                            📚 Tandai Sedang Dipinjam
+                            Tandai Sedang Dipinjam
                         </button>
 
                     </form>
@@ -419,7 +509,7 @@
                 @elseif ($loan->status === 'borrowed')
 
                     <div class="rounded-xl bg-indigo-50 px-5 py-4 text-sm font-semibold text-indigo-700">
-                        📚 Buku sedang dipinjam oleh siswa.
+                        Buku sedang dipinjam oleh siswa.
                     </div>
 
                 {{-- Return pending --}}
@@ -430,7 +520,7 @@
                         <div class="rounded-xl bg-orange-50 px-5 py-4">
 
                             <p class="font-bold text-orange-800">
-                                ⏳ Menunggu Konfirmasi Pengembalian
+                                Menunggu Konfirmasi Pengembalian
                             </p>
 
                             <p class="mt-1 text-sm text-orange-700">
@@ -450,7 +540,7 @@
                                 class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
                                 onclick="return confirm('Yakin pengembalian buku sudah diterima? Stok akan otomatis ditambahkan dan denda dihitung.')"
                             >
-                                ✓ Konfirmasi Pengembalian
+                                Konfirmasi Pengembalian
                             </button>
 
                         </form>
@@ -463,7 +553,7 @@
                     <div class="rounded-xl bg-emerald-50 px-5 py-4">
 
                         <p class="font-bold text-emerald-800">
-                            ✓ Peminjaman Selesai
+                            Peminjaman Selesai
                         </p>
 
                         <p class="mt-1 text-sm text-emerald-700">
@@ -478,7 +568,7 @@
                     <div class="rounded-xl bg-red-50 px-5 py-4">
 
                         <p class="font-bold text-red-800">
-                            ✕ Peminjaman Ditolak
+                            Peminjaman Ditolak
                         </p>
 
                         <p class="mt-1 text-sm text-red-700">
@@ -574,4 +664,37 @@
     </div>
 
 @endif
+@push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        (function () {
+            var el = document.getElementById('admin-loan-qr');
+            if (!el) return;
+
+            if (typeof QRCode === 'undefined') {
+                el.innerHTML = '<p class="text-center text-xs text-slate-500">QR gagal dimuat</p>';
+                return;
+            }
+
+            new QRCode(el, {
+                text: @json(route('admin.loans.code', $loan->loan_code)),
+                width: 132,
+                height: 132,
+                colorDark: '#0f172a',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        })();
+    </script>
+@endpush
+<script>
+    document.querySelectorAll('form[data-handover]').forEach(function (form) {
+        const check = form.querySelector('input[type="checkbox"]');
+        const submit = form.querySelector('button[type="submit"]');
+        const sync = function () { submit.disabled = !check.checked; };
+        check.addEventListener('change', sync);
+        sync();
+    });
+</script>
+
 @endsection

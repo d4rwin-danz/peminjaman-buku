@@ -24,6 +24,14 @@
                     </p>
                 </div>
 
+                <a
+                    href="{{ route('admin.loans.scan') }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M4 12h16"/></svg>
+                    Scan Kode / QR
+                </a>
+
             </div>
         </div>
 
@@ -100,7 +108,7 @@
                         type="text"
                         name="search"
                         value="{{ $search ?? '' }}"
-                        placeholder="Nama siswa, email, judul, atau kode buku..."
+                        placeholder="Kode peminjaman, nama siswa, NIS, judul, atau kode buku..."
                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                     >
                 </div>
@@ -252,6 +260,12 @@
                                             #{{ $loan->id }}
                                         </p>
 
+                                        @if ($loan->loan_code)
+                                            <p class="mt-0.5 font-mono text-xs text-slate-500">
+                                                {{ $loan->loan_code }}
+                                            </p>
+                                        @endif
+
                                         @foreach ($loan->details as $detail)
                                             <p class="mt-1 truncate text-sm text-slate-600">
                                                 {{ $detail->book->title }}
@@ -270,7 +284,7 @@
                                     </p>
 
                                     <p class="mt-1 text-xs text-slate-500">
-                                        {{ $loan->user->email }}
+                                        {{ $loan->user->identifier }}
                                     </p>
                                 </td>
 
@@ -307,9 +321,7 @@
                             <tr>
                                 <td colspan="5" class="px-6 py-16 text-center">
 
-                                    <div class="text-4xl">
-                                        📚
-                                    </div>
+                                    <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
 
                                     <h3 class="mt-3 font-bold text-slate-900">
                                         Tidak Ada Data
@@ -384,12 +396,18 @@
                                 PEMINJAMAN #{{ $loan->id }}
                             </p>
 
+                            @if ($loan->loan_code)
+                                <p class="font-mono text-xs text-slate-500">
+                                    {{ $loan->loan_code }}
+                                </p>
+                            @endif
+
                             <h2 class="mt-1 font-bold text-slate-900">
                                 {{ $loan->user->name }}
                             </h2>
 
                             <p class="mt-0.5 text-xs text-slate-500">
-                                {{ $loan->user->email }}
+                                {{ $loan->user->identifier }}
                             </p>
                         </div>
 
@@ -458,9 +476,7 @@
 
                 <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
 
-                    <div class="text-4xl">
-                        📚
-                    </div>
+                    <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
 
                     <h3 class="mt-3 font-bold text-slate-900">
                         Tidak Ada Data

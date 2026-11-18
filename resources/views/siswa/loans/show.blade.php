@@ -20,9 +20,6 @@
 
     <div>
 
-        <p class="text-sm font-semibold uppercase tracking-wider text-indigo-600">
-            Detail Peminjaman
-        </p>
 
         <h1 class="mt-1 text-3xl font-bold text-slate-900">
             Peminjaman #{{ $loan->id }}
@@ -41,37 +38,37 @@
         @if ($loan->status === 'pending')
 
             <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700">
-                🟡 Menunggu Persetujuan
+                <span class="mr-2 inline-block h-2 w-2 rounded-full bg-amber-500"></span>Menunggu Persetujuan
             </span>
 
         @elseif ($loan->status === 'approved')
 
             <span class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-100 px-4 py-2 text-sm font-bold text-indigo-700">
-                🟢 Disetujui
+                <span class="mr-2 inline-block h-2 w-2 rounded-full bg-ink-500"></span>Disetujui
             </span>
 
         @elseif ($loan->status === 'borrowed')
 
             <span class="inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-                🔵 Sedang Dipinjam
+                <span class="mr-2 inline-block h-2 w-2 rounded-full bg-ink-700"></span>Sedang Dipinjam
             </span>
 
         @elseif ($loan->status === 'return_pending')
 
             <span class="inline-flex items-center rounded-full border border-orange-200 bg-orange-100 px-4 py-2 text-sm font-bold text-orange-700">
-                🟠 Menunggu Verifikasi Pengembalian
+                <span class="mr-2 inline-block h-2 w-2 rounded-full bg-orange-500"></span>Menunggu Verifikasi Pengembalian
             </span>
 
         @elseif ($loan->status === 'returned')
 
             <span class="inline-flex items-center rounded-full border border-green-200 bg-green-100 px-4 py-2 text-sm font-bold text-green-700">
-                ✅ Dikembalikan
+                <span class="mr-2 inline-block h-2 w-2 rounded-full bg-green-600"></span>Dikembalikan
             </span>
 
         @elseif ($loan->status === 'rejected')
 
             <span class="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
-                ❌ Ditolak
+                <span class="mr-2 inline-block h-2 w-2 rounded-full bg-red-600"></span>Ditolak
             </span>
 
         @else
@@ -87,14 +84,22 @@
 </div>
 
 
+{{-- INVOICE / KODE PEMINJAMAN --}}
+@if ($loan->status !== 'rejected' && $loan->loan_code)
+
+    <div class="mt-8">
+        @include('components.loan-invoice', ['loan' => $loan])
+    </div>
+
+@endif
+
+
 {{-- LOAN INFORMATION --}}
 <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
 
     <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
 
-        <div class="text-2xl">
-            📅
-        </div>
+        
 
         <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
             Tanggal Pinjam
@@ -109,10 +114,6 @@
 
     <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
 
-        <div class="text-2xl">
-            ⏰
-        </div>
-
         <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
             Batas Pengembalian
         </p>
@@ -126,9 +127,7 @@
 
     <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
 
-        <div class="text-2xl">
-            🔄
-        </div>
+        
 
         <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
             Tanggal Dikembalikan
@@ -149,7 +148,7 @@
     <div class="border-b border-slate-100 px-6 py-5">
 
         <h2 class="text-xl font-bold text-slate-900">
-            📚 Buku yang Dipinjam
+            Buku yang Dipinjam
         </h2>
 
         <p class="mt-1 text-sm text-slate-500">
@@ -171,16 +170,14 @@
                     @if ($detail->book && $detail->book->cover)
 
                         <img
-                            src="{{ asset('storage/' . $detail->book->cover) }}"
+                            src="{{ asset(str_starts_with($detail->book->cover, 'uploads/') ? $detail->book->cover : 'storage/' . $detail->book->cover) }}"
                             alt="{{ $detail->book->title }}"
                             class="h-full w-full object-cover"
                         >
 
                     @else
 
-                        <div class="flex h-full items-center justify-center text-4xl">
-                            📚
-                        </div>
+                        <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
 
                     @endif
 
@@ -245,23 +242,23 @@
 </div>
 
 
-{{-- BORROWING PROOF --}}
-<div class="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+{{-- FOTO BUKTI LAMA (peminjaman sebelum fitur invoice) --}}
+@if ($loan->borrowing_proof)
 
-    <div>
+    <div class="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
 
-        <h2 class="text-xl font-bold text-slate-900">
-            📸 Bukti Peminjaman
-        </h2>
+        <div>
 
-        <p class="mt-1 text-sm text-slate-500">
-            Foto yang kamu kirim saat mengajukan peminjaman.
-        </p>
+            <h2 class="text-xl font-bold text-slate-900">
+                Foto Bukti Peminjaman (Lama)
+            </h2>
 
-    </div>
+            <p class="mt-1 text-sm text-slate-500">
+                Foto yang kamu kirim saat mengajukan peminjaman sebelum fitur invoice tersedia.
+            </p>
 
+        </div>
 
-    @if ($loan->borrowing_proof)
 
         <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
 
@@ -273,23 +270,9 @@
 
         </div>
 
-    @else
+    </div>
 
-        <div class="mt-5 rounded-2xl bg-slate-50 p-8 text-center">
-
-            <div class="text-4xl">
-                📷
-            </div>
-
-            <p class="mt-2 text-sm text-slate-500">
-                Belum ada foto bukti peminjaman.
-            </p>
-
-        </div>
-
-    @endif
-
-</div>
+@endif
 
 
 {{-- RETURN PROOF --}}
@@ -300,7 +283,7 @@
         <div>
 
             <h2 class="text-xl font-bold text-slate-900">
-                🔄 Bukti Pengembalian
+                Bukti Pengembalian
             </h2>
 
             <p class="mt-1 text-sm text-slate-500">
@@ -331,7 +314,7 @@
     <div class="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
 
         <h2 class="text-xl font-bold text-slate-900">
-            📝 Catatan
+            Catatan
         </h2>
 
         <div class="mt-4 rounded-2xl bg-slate-50 p-5">
@@ -357,7 +340,7 @@
             <div>
 
                 <h2 class="text-lg font-bold text-orange-900">
-                    🔄 Sudah Mengembalikan Buku?
+                    Sudah Mengembalikan Buku?
                 </h2>
 
                 <p class="mt-1 text-sm leading-6 text-orange-700">
@@ -372,7 +355,7 @@
                 href="{{ route('siswa.loans.return.create', $loan) }}"
                 class="inline-flex shrink-0 items-center justify-center rounded-xl bg-orange-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-orange-700"
             >
-                🔄 Ajukan Pengembalian
+                Ajukan Pengembalian
             </a>
 
         </div>
@@ -385,9 +368,7 @@
 
         <div class="flex items-start gap-4">
 
-            <div class="text-3xl">
-                ⏳
-            </div>
+            
 
             <div>
 
@@ -412,9 +393,7 @@
 
         <div class="flex items-start gap-4">
 
-            <div class="text-3xl">
-                ✅
-            </div>
+            
 
             <div class="flex-1">
 
@@ -481,9 +460,7 @@
 
         <div class="flex items-start gap-4">
 
-            <div class="text-3xl">
-                ❌
-            </div>
+            
 
             <div>
 

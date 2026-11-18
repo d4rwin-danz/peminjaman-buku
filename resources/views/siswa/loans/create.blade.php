@@ -35,16 +35,14 @@
                 @if ($book->cover)
 
                     <img
-                        src="{{ asset('storage/' . $book->cover) }}"
+                        src="{{ asset(str_starts_with($book->cover, 'uploads/') ? $book->cover : 'storage/' . $book->cover) }}"
                         alt="{{ $book->title }}"
                         class="h-full w-full object-cover"
                     >
 
                 @else
 
-                    <div class="flex h-full items-center justify-center text-4xl">
-                        📚
-                    </div>
+                    <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
 
                 @endif
 
@@ -85,7 +83,6 @@
         <form
             action="{{ route('siswa.loans.store', $book) }}"
             method="POST"
-            enctype="multipart/form-data"
             class="space-y-6"
         >
 
@@ -126,34 +123,22 @@
             </div>
 
 
-            {{-- Bukti --}}
-            <div>
+            {{-- Info invoice --}}
+            <div class="flex gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
 
-                <label
-                    for="borrowing_proof"
-                    class="mb-2 block text-sm font-semibold text-gray-700"
-                >
-                    Foto Bukti Peminjaman
-                </label>
+                <svg class="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/></svg>
 
-                <input
-                    type="file"
-                    id="borrowing_proof"
-                    name="borrowing_proof"
-                    accept="image/jpeg,image/png,image/webp"
-                    required
-                    class="block w-full rounded-lg border border-gray-300 bg-white text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2.5 file:font-semibold file:text-white hover:file:bg-blue-700"
-                >
-
-                <p class="mt-2 text-xs text-gray-500">
-                    Format: JPG, JPEG, PNG, atau WEBP. Maksimal 5 MB.
-                </p>
-
-                @error('borrowing_proof')
-                    <p class="mt-1 text-sm text-red-600">
-                        {{ $message }}
+                <div class="text-sm text-indigo-900">
+                    <p class="font-semibold">
+                        Tidak perlu upload foto bukti
                     </p>
-                @enderror
+
+                    <p class="mt-1 text-indigo-700">
+                        Setelah mengajukan, kamu otomatis mendapat
+                        <strong>invoice berisi kode peminjaman &amp; QR code</strong>.
+                        Cukup tunjukkan invoice tersebut ke petugas perpustakaan.
+                    </p>
+                </div>
 
             </div>
 

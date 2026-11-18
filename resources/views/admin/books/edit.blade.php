@@ -71,7 +71,7 @@
                         class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
                     >
 
-                        @foreach($categories as $category)
+                        @foreach ($categories as $category)
 
                             <option
                                 value="{{ $category->id }}"
@@ -185,6 +185,40 @@
                 <div>
 
                     <label class="block font-semibold mb-2">
+                        Lokasi Rak
+                    </label>
+
+                    <select
+                        name="rack_location"
+                        class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+
+                        <option value="">
+                            Belum ditentukan
+                        </option>
+
+                        @foreach ($rackLocations as $value => $label)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(old('rack_location', $book->rack_location) === $value)
+                            >
+                                {{ $label }}
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                    <p class="text-xs text-slate-500 mt-2">
+                        Pilih lokasi rak tempat buku disimpan.
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <label class="block font-semibold mb-2">
                         Cover Baru
                     </label>
 
@@ -195,10 +229,10 @@
                         class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white"
                     >
 
-                    @if($book->cover)
+                    @if ($book->cover)
 
                         <img
-                            src="{{ asset('storage/' . $book->cover) }}"
+                            src="{{ asset(str_starts_with($book->cover, 'uploads/') ? $book->cover : 'storage/' . $book->cover) }}"
                             class="mt-3 w-24 h-32 object-cover rounded-xl"
                             alt="{{ $book->title }}"
                         >

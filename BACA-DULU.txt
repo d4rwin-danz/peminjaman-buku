@@ -1,0 +1,16 @@
+PERBAIKAN FOTO E-LIBRARY UNTUK INFINITYFREE
+
+Sebelum mulai: unduh/cadangkan file yang akan diganti. ZIP ini hanya berisi file yang perlu diganti dan salinan gambar storage yang ada di ZIP proyek yang dikirim.
+
+CARA PASANG
+1. Buka InfinityFree File Manager dan masuk ke htdocs (folder yang berisi app, resources, public, dan storage).
+2. Upload ZIP ini ke htdocs lalu ekstrak dengan mempertahankan struktur folder. Jika File Manager tidak bisa menimpa file, unggah file dari ZIP satu per satu ke folder tujuan.
+3. Pastikan htdocs/.htaccess diganti dengan versi di ZIP. Aturan ini mengarahkan /storage/... ke public/storage/... tanpa mengulang rewrite terus-menerus.
+4. Pastikan foto lama yang ada di htdocs/storage/app/public/loan-proofs, return-proofs, dan covers juga tersedia pada htdocs/public/storage dengan subfolder/nama yang sama. ZIP ini membawa salinan file yang ada di ZIP proyek yang dikirim; untuk foto yang lebih baru di hosting, salin juga file tersebut melalui File Manager.
+5. Kode upload bukti yang baru menyimpan foto berikutnya langsung ke public/storage/loan-proofs atau public/storage/return-proofs, agar bisa dibuka sebagai /storage/loan-proofs/nama.png atau /storage/return-proofs/nama.png.
+6. Path sampul baru menggunakan uploads/covers/... dan view sekarang mengarahkannya ke URL yang benar.
+7. Jangan upload file .env atau menimpa seluruh proyek. Jangan hapus folder lama sampai semua foto sudah berhasil dites.
+
+TES
+- Buka katalog buku, detail buku, detail peminjaman, dan detail pengembalian.
+- Jika gambar lama belum tampil, pastikan file dengan nama yang tersimpan di database ada di public/storage/subfolder yang sesuai.

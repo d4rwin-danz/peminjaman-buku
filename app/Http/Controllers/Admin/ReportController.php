@@ -35,7 +35,9 @@ class ReportController extends Controller
                     $q->whereHas('user', function ($userQuery) use ($search) {
                         $userQuery
                             ->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('nis', 'like', "%{$search}%")
+                            ->orWhere('staff_number', 'like', "%{$search}%");
                     });
 
                     $q->orWhereHas('details.book', function ($bookQuery) use ($search) {
@@ -63,7 +65,9 @@ class ReportController extends Controller
                     $q->whereHas('user', function ($userQuery) use ($search) {
                         $userQuery
                             ->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('nis', 'like', "%{$search}%")
+                            ->orWhere('staff_number', 'like', "%{$search}%");
                     });
 
                     $q->orWhereHas('details.book', function ($bookQuery) use ($search) {
@@ -142,7 +146,9 @@ class ReportController extends Controller
                 $q->whereHas('user', function ($userQuery) use ($search) {
                     $userQuery
                         ->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('nis', 'like', "%{$search}%")
+                            ->orWhere('staff_number', 'like', "%{$search}%");
                 });
 
                 $q->orWhereHas('details.book', function ($bookQuery) use ($search) {
@@ -176,4 +182,104 @@ class ReportController extends Controller
 
     return $pdf->download('laporan-peminjaman.pdf');
 }
+    public function exportExcel(Request $request)
+    {
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $status = $request->input('status');
+        $search = $request->input('search');
+
+        $loans = Loan::with([
+            'user',
+            'details.book',
+        ])
+            ->when($dateFrom, function ($query) use ($dateFrom) {
+                $query->whereDate('loan_date', '>=', $dateFrom);
+            })
+            ->when($dateTo, function ($query) use ($dateTo) {
+                $query->whereDate('loan_date', '<=', $dateTo);
+            })
+            ->when($status, function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('nis', 'like', "%{$search}%")
+                            ->orWhere('staff_number', 'like', "%{$search}%");
+                    });
+
+                    $q->orWhereHas('details.book', function ($bookQuery) use ($search) {
+                        $bookQuery
+                            ->where('title', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%");
+                    });
+                });
+            })
+            ->latest('loan_date')
+            ->get();
+
+        return response()->streamDownload(function () use ($loans) {
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID Peminjaman',
+                'Nama Siswa',
+                'NIS / Email Siswa',
+                'Kode Buku',
+                'Judul Buku',
+                'Tanggal Peminjaman',
+                'Tanggal Pengembalian',
+                'Status',
+                'Denda',
+            ]);
+
+            $safe = function ($value) {
+                $value = (string) ($value ?? '');
+
+                if (preg_match('/^[\s]*[=+\-@]/u', $value)) {
+                    return "'" . $value;
+                }
+
+                return $value;
+            };
+
+            foreach ($loans as $loan) {
+                $details = $loan->details;
+
+                if ($details->isEmpty()) {
+                    $details = [null];
+                }
+
+                foreach ($details as $detail) {
+                    $book = $detail ? $detail->book : null;
+
+                    $row = [
+                        $loan->id,
+                        $loan->user->name ?? '',
+                        $loan->user->identifier,
+                        $book->code ?? '',
+                        $book->title ?? '',
+                        $loan->loan_date ?? '',
+                        $loan->getAttribute('return_date')
+                            ?? $loan->getAttribute('returned_at')
+                            ?? '',
+                        $loan->status ?? '',
+                        $loan->fine ?? 0,
+                    ];
+
+                    fputcsv($handle, array_map($safe, $row));
+                }
+            }
+
+            fclose($handle);
+        }, 'laporan-peminjaman-' . date('Y-m-d-His') . '.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
 }

@@ -33,7 +33,7 @@
     @if ($errors->any())
         <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5">
             <div class="flex gap-3">
-                <div class="text-xl">⚠️</div>
+                
 
                 <div>
                     <h3 class="font-semibold text-red-800">
@@ -85,14 +85,12 @@
 
                                 @if ($detail->book->cover)
                                     <img
-                                        src="{{ asset('storage/' . $detail->book->cover) }}"
+                                        src="{{ asset(str_starts_with($detail->book->cover, 'uploads/') ? $detail->book->cover : 'storage/' . $detail->book->cover) }}"
                                         alt="{{ $detail->book->title }}"
                                         class="w-full h-full object-cover"
                                     >
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center text-3xl">
-                                        📚
-                                    </div>
+                                    <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
                                 @endif
 
                             </div>
@@ -212,7 +210,7 @@
                         type="submit"
                         class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
                     >
-                        🔄 Ajukan Pengembalian
+                        Ajukan Pengembalian
                     </button>
 
                 </div>
@@ -226,10 +224,6 @@
 
             <div class="rounded-3xl bg-blue-50 border border-blue-100 p-6">
 
-                <div class="text-3xl mb-4">
-                    📸
-                </div>
-
                 <h3 class="font-bold text-slate-900">
                     Foto Bukti
                 </h3>
@@ -242,10 +236,6 @@
             </div>
 
             <div class="rounded-3xl bg-amber-50 border border-amber-100 p-6">
-
-                <div class="text-3xl mb-4">
-                    ⏰
-                </div>
 
                 <h3 class="font-bold text-slate-900">
                     Perhatikan Batas Waktu

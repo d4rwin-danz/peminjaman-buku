@@ -17,4 +17,8 @@ return [
     // Denda keterlambatan per buku per hari
     'fine_per_book_per_day' => 1000,
 
+    // Email admin yang diberi tahu saat ada permintaan aktivasi (pisahkan dengan koma).
+    // Jika kosong, dipakai email semua akun dengan role admin.
+    'admin_notify_email' => env('LIBRARY_ADMIN_EMAIL'),
+
 ];

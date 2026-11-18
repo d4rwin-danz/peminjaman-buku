@@ -43,6 +43,20 @@ class BookController extends Controller
     {
         $book->load('category');
 
-        return view('siswa.books.show', compact('book'));
+        // Popularitas: berapa kali buku ini dipinjam (pengajuan yang ditolak tidak dihitung).
+        $borrowCount = $book->loanDetails()
+            ->whereHas('loan', fn ($q) => $q->where('status', '!=', 'rejected'))
+            ->count();
+
+        // Buku lain dari kategori yang sama.
+        $relatedBooks = Book::with('category')
+            ->where('id', '!=', $book->id)
+            ->when($book->category_id, fn ($q) => $q->where('category_id', $book->category_id))
+            ->orderByDesc('stock')
+            ->latest('id')
+            ->limit(3)
+            ->get();
+
+        return view('siswa.books.show', compact('book', 'borrowCount', 'relatedBooks'));
     }
 }

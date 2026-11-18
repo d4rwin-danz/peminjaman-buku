@@ -22,6 +22,7 @@ class Book extends Model
         'stock',
         'cover',
         'description',
+        'rack_location',
     ];
 
     public function category(): BelongsTo

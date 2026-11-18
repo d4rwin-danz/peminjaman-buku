@@ -1,0 +1,30 @@
+FITUR BARU: INVOICE + QR CODE PEMINJAMAN (menggantikan upload foto bukti)
+
+ISI ZIP INI = hanya file yang berubah/baru. Upload ke htdocs dengan struktur folder sama
+(timpa file lama). Jangan upload .env.
+
+LANGKAH PASANG
+1. Backup dulu file yang akan ditimpa.
+2. Upload semua file di ZIP ini ke htdocs (timpa).
+3. WAJIB - tambah kolom kode peminjaman di database:
+   a. Jika bisa SSH/artisan : php artisan migrate
+   b. Jika InfinityFree (tanpa SSH): buka phpMyAdmin > pilih database > tab SQL,
+      lalu jalankan isi file  database/loan_code.sql  (cukup SEKALI).
+4. Selesai. Hapus cache view bila tampilan lama masih muncul:
+   hapus file di storage/framework/views/*.php
+
+ALUR BARU
+- Siswa: pilih buku > isi jumlah > Ajukan. Tidak ada upload foto lagi.
+  Langsung muncul INVOICE berisi kode (PJM-20261102-A7K3QX) + QR code.
+  Invoice bisa dibuka lagi kapan saja di menu "Peminjaman Saya" > "Lihat Invoice / QR",
+  dan bisa dicetak / disimpan PDF.
+- Admin: menu Peminjaman > tombol "Scan Kode / QR" -> scan pakai kamera,
+  atau ketik kode (bisa juga pakai scanner USB). Langsung membuka detail peminjaman
+  untuk disetujui / diserahkan / dikonfirmasi.
+- Pencarian di daftar peminjaman admin juga bisa memakai kode peminjaman.
+- Peminjaman lama tetap aman: foto bukti lama tetap tampil, dan otomatis diberi kode.
+
+CATATAN
+- QR & scanner kamera memakai library dari CDN (cdnjs / jsDelivr), jadi perlu internet.
+- Kamera di halaman scan hanya jalan lewat HTTPS.
+- Jika QR gagal dimuat, kode teks tetap tampil dan bisa diketik admin.

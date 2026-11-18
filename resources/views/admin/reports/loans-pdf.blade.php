@@ -224,9 +224,9 @@
                     <td>
                         <strong>{{ $loan->user->name ?? '-' }}</strong>
 
-                        @if ($loan->user?->email)
+                        @if ($loan->user?->identifier)
                             <br>
-                            {{ $loan->user->email }}
+                            {{ $loan->user->identifier }}
                         @endif
                     </td>
 

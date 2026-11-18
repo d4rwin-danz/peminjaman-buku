@@ -1,0 +1,32 @@
+EMAIL NOTIFIKASI AKTIVASI UNTUK ADMIN
+
+File (timpa / tambahkan sesuai struktur folder):
+- app/Mail/ActivationRequested.php                         (baru)
+- resources/views/emails/activation-requested.blade.php    (baru)
+- app/Http/Controllers/AuthController.php                  (diubah)
+- config/library.php                                       (diubah)
+
+PENGATURAN .env (WAJIB, kalau tidak email hanya masuk log)
+Contoh memakai Gmail SMTP:
+
+  LIBRARY_ADMIN_EMAIL=admin@sekolah.sch.id,petugas@gmail.com
+  MAIL_MAILER=smtp
+  MAIL_HOST=smtp.gmail.com
+  MAIL_PORT=587
+  MAIL_SCHEME=null
+  MAIL_USERNAME=emailpengirim@gmail.com
+  MAIL_PASSWORD=sandi-aplikasi-16-karakter
+  MAIL_FROM_ADDRESS="emailpengirim@gmail.com"
+  MAIL_FROM_NAME="E-Library"
+  APP_URL=https://eperpus-siswa.rf.gd
+
+Catatan:
+- Gmail butuh "Sandi Aplikasi" (Akun Google > Keamanan > Verifikasi 2 langkah > Sandi aplikasi), bukan sandi biasa.
+- LIBRARY_ADMIN_EMAIL boleh dikosongkan; sistem lalu memakai email semua akun admin di tabel users.
+- APP_URL harus alamat asli situs agar tombol di email mengarah benar.
+- Setelah ubah .env: jalankan "php artisan config:clear" (atau hapus bootstrap/cache/config.php).
+- InfinityFree gratis sering memblokir koneksi SMTP keluar. Jika email tidak masuk, cek storage/logs/laravel.log. Alternatif: pakai layanan API email (Brevo/Resend) atau hosting yang membuka SMTP.
+- Kegagalan kirim email TIDAK menggagalkan pengajuan aktivasi siswa; hanya dicatat di log.
+
+CARA TES
+Ajukan aktivasi dengan NIS yang belum aktif, lalu cek inbox admin (dan folder spam).

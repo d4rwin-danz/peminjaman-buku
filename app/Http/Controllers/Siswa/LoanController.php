@@ -8,6 +8,7 @@ use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class LoanController extends Controller
 {
@@ -51,16 +52,26 @@ class LoanController extends Controller
             ->where('status', 'pending')
             ->count();
 
+        // Semua status yang belum benar-benar selesai tetap masuk hitungan ini.
+        // Pengajuan pengembalian (return_pending) belum dianggap selesai.
         $activeLoans = (clone $userLoans)
-            ->whereIn('status', [
-                'approved',
-                'borrowed',
-                'return_pending',
-            ])
+            ->where(function ($query) {
+                $query->whereIn('status', [
+                    'approved',
+                    'borrowed',
+                    'return_pending',
+                ])->orWhere(function ($query) {
+                    // Data returned tanpa tanggal pengembalian belum valid selesai.
+                    $query->where('status', 'returned')
+                        ->whereNull('return_date');
+                });
+            })
             ->count();
 
+        // Selesai hanya jika admin sudah mengonfirmasi dan return_date terisi.
         $returnedLoans = (clone $userLoans)
             ->where('status', 'returned')
+            ->whereNotNull('return_date')
             ->count();
 
         return view('siswa.loans.index', compact(
@@ -83,8 +94,11 @@ class LoanController extends Controller
             abort(403, 'Anda tidak memiliki akses ke peminjaman ini.');
         }
 
+        $loan->ensureLoanCode();
+
         $loan->load([
             'details.book.category',
+            'user',
         ]);
 
         return view('siswa.loans.show', compact('loan'));
@@ -126,13 +140,6 @@ class LoanController extends Controller
                 ),
             ],
 
-            'borrowing_proof' => [
-                'required',
-                'image',
-                'mimes:jpg,jpeg,png,webp',
-                'max:5120',
-            ],
-
             'notes' => [
                 'nullable',
                 'string',
@@ -143,11 +150,6 @@ class LoanController extends Controller
             'quantity.integer' => 'Jumlah buku harus berupa angka.',
             'quantity.min' => 'Jumlah buku minimal 1.',
             'quantity.max' => 'Jumlah buku melebihi batas yang diperbolehkan.',
-
-            'borrowing_proof.required' => 'Foto bukti peminjaman wajib diunggah.',
-            'borrowing_proof.image' => 'File harus berupa gambar.',
-            'borrowing_proof.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
-            'borrowing_proof.max' => 'Ukuran foto maksimal 5 MB.',
 
             'notes.max' => 'Catatan maksimal 1000 karakter.',
         ]);
@@ -174,18 +176,14 @@ class LoanController extends Controller
                 );
         }
 
-        $borrowingProof = $request
-            ->file('borrowing_proof')
-            ->store('loan-proofs', 'public');
-
         $loanDuration = config('library.loan_duration_days', 7);
 
-        DB::transaction(function () use (
+        $loan = DB::transaction(function () use (
             $validated,
-            $borrowingProof,
             $loanDuration,
             $book
         ) {
+            // Kode peminjaman (loan_code) dibuat otomatis oleh model Loan.
             $loan = Loan::create([
                 'user_id' => Auth::id(),
                 'loan_date' => now()->toDateString(),
@@ -193,7 +191,6 @@ class LoanController extends Controller
                     ->addDays($loanDuration)
                     ->toDateString(),
                 'status' => 'pending',
-                'borrowing_proof' => $borrowingProof,
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -201,13 +198,16 @@ class LoanController extends Controller
                 'book_id' => $book->id,
                 'quantity' => $validated['quantity'],
             ]);
+
+            return $loan;
         });
 
+        // Langsung arahkan ke invoice supaya bisa ditunjukkan ke petugas.
         return redirect()
-            ->route('siswa.loans.index')
+            ->route('siswa.loans.show', $loan)
             ->with(
                 'success',
-                'Pengajuan peminjaman berhasil dikirim dan menunggu persetujuan admin.'
+                'Pengajuan berhasil dikirim. Tunjukkan invoice/QR ini ke petugas perpustakaan.'
             );
     }
 
@@ -276,9 +276,16 @@ class LoanController extends Controller
             'notes.max' => 'Catatan maksimal 1000 karakter.',
         ]);
 
-        $returnProof = $request
-            ->file('return_proof')
-            ->store('return-proofs', 'public');
+        $destination = public_path('storage/return-proofs');
+
+        if (!is_dir($destination)) {
+            mkdir($destination, 0755, true);
+        }
+
+        $file = $request->file('return_proof');
+        $filename = Str::random(40) . '.' . $file->extension();
+        $file->move($destination, $filename);
+        $returnProof = 'return-proofs/' . $filename;
 
         $loan->update([
             'status' => 'return_pending',

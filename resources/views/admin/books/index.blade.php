@@ -146,10 +146,18 @@
                                 @if($book->cover)
 
                                     <img
-                                        src="{{ asset('storage/' . $book->cover) }}"
+                                        src="{{ asset(str_starts_with($book->cover, 'uploads/') ? $book->cover : 'storage/' . $book->cover) }}"
                                         alt="{{ $book->title }}"
                                         class="w-14 h-20 object-cover rounded-lg"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                     >
+
+                                    <div
+                                        class="w-14 h-20 bg-slate-100 rounded-lg items-center justify-center text-xs text-slate-400"
+                                        style="display: none;"
+                                    >
+                                        No Cover
+                                    </div>
 
                                 @else
 
@@ -170,7 +178,7 @@
                             </td>
 
                             <td class="px-6 py-4">
-                                {{ $book->category->name }}
+                                {{ $book->category->name ?? '-' }}
                             </td>
 
                             <td class="px-6 py-4">
@@ -246,7 +254,6 @@
                                 class="px-6 py-12 text-center text-slate-500"
                             >
                                 Tidak ada buku ditemukan.
-
                             </td>
 
                         </tr>

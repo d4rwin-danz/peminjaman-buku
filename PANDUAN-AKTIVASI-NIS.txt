@@ -1,0 +1,79 @@
+AKTIVASI AKUN SISWA (NIS) + PERUBAHAN ALUR PEMINJAMAN
+=======================================================
+
+ISI PERUBAHAN
+1. Siswa tidak lagi daftar bebas. Alurnya:
+   Aktivasi (NIS + password buatan sendiri) -> admin ACC -> login dengan NIS + password.
+2. Data siswa mengikuti DADIR kelas XII 2026/2027 (749 siswa, 22 kelas): NIS (primary key), nama,
+   JK, agama, kelas, wali kelas, bidang/program/konsentrasi keahlian.
+3. Admin: menu baru "Aktivasi Siswa" (ACC satu per satu, ACC massal dengan checkbox, tolak dengan
+   alasan, nonaktifkan, tambah/edit siswa). Yang menunggu ACC selalu paling atas.
+4. Peminjaman pending: admin mencentang "Buku sudah diserahkan" lalu klik tombol -> status
+   LANGSUNG "Sedang Dipinjam" (tidak berhenti di "Disetujui"). Stok berkurang, tanggal pinjam
+   = hari itu, jatuh tempo = hari itu + 7 hari.
+5. Dashboard admin & daftar peminjaman: urutan Perlu Diurus (pengembalian menunggu, pending,
+   terlambat) paling atas -> Sedang Dipinjam -> Selesai (dikembalikan/ditolak) paling bawah.
+6. Admin tetap login memakai email. Akun siswa lama (login email) tetap bisa masuk.
+
+CARA PASANG DI INFINITYFREE (tanpa SSH)
+1. Export/cadangkan database dulu lewat phpMyAdmin.
+2. phpMyAdmin -> pilih database if0_43147052_e_library -> tab SQL -> tempel isi file
+   if0_43147052_e_library_aktivasi_nis.sql -> Go. (Cukup SATU kali.)
+3. Upload file di folder app/, database/, resources/, routes/ ke lokasi yang sama di htdocs
+   (timpa file lama). Jangan upload .env.
+4. Hapus resources/views/auth/register.blade.php (sudah tidak dipakai).
+5. Kalau view/route tidak berubah, hapus isi storage/framework/views/*.php dan bootstrap/cache/*.php
+   (kecuali .gitignore) lewat File Manager.
+
+CARA PASANG LOKAL / SERVER DENGAN ARTISAN
+   php artisan migrate
+   php artisan db:seed --class=StudentSeeder
+   php artisan view:clear && php artisan route:clear
+
+CATATAN
+- Verifikasi pengaju: siapa pun bisa mengetik NIS orang lain saat aktivasi. Sebelum menekan ACC,
+  pastikan nama dan kelas di daftar cocok dengan orang yang mengajukan.
+- Lupa password: admin klik "Nonaktifkan" pada siswa itu, siswa aktivasi lagi dengan password baru.
+- NIS 23386 tidak ada di DADIR (urutan loncat dari 23385 ke 23387). Tambahkan lewat menu
+  "Tambah Siswa" bila memang ada siswanya.
+
+
+=======================================================
+TAMBAHAN: SISWA BARU & PEGAWAI/STAF (LOGIN DENGAN NIK)
+=======================================================
+- Siswa yang belum ada di database: admin buka menu "Aktivasi Siswa" -> "+ Tambah Siswa",
+  isi data sesuai DADIR. Setelah disimpan, siswa tinggal aktivasi dengan NIS lalu di-ACC.
+- Pegawai & staf sekolah punya tabel sendiri (tabel "staffs"), NIK 16 digit sebagai primary key.
+  Menu admin "Aktivasi Pegawai" -> "+ Tambah Pegawai". Isinya: NIK, nama, JK, agama, jabatan,
+  status kepegawaian (PNS/PPPK/GTT/PTT), NIP, mapel/unit, no. HP.
+- Alur pegawai sama dengan siswa: admin tambah data -> pegawai aktivasi di /aktivasi (isi NIK +
+  password) -> admin ACC -> login dengan NIK + password. Pegawai memakai role "pegawai" dan bisa
+  meminjam buku seperti siswa.
+- Halaman login & aktivasi memakai satu kolom "NIS / NIK": 16 digit dikenali sebagai NIK,
+  4-10 digit sebagai NIS.
+- Dashboard admin menampilkan aktivasi siswa dan pegawai dalam satu panel (ACC cepat).
+
+PASANG TAMBAHAN INI
+1. Backup database. Pastikan if0_43147052_e_library_aktivasi_nis.sql sudah pernah dijalankan.
+2. Jalankan if0_43147052_e_library_pegawai_nik.sql di phpMyAdmin (sekali saja).
+3. Upload ulang semua file di ZIP (timpa), jangan upload .env. Kosongkan storage/framework/views.
+   Lokal/artisan: php artisan migrate
+
+
+=======================================================
+DATA PEGAWAI DARI "DATA KEPEGAWAIAN 2026" (UPDATE JULI 2026)
+=======================================================
+- File sumber hanya berisi NIP, tidak ada NIK. Maka kunci pegawai (kolom staff_number) menerima
+  NIP 18 digit (tanpa spasi) ATAU NIK 16 digit. Pegawai login/aktivasi dengan nomor itu.
+  Contoh NIP "19751211 200501 1 005" diketik 197512112005011005. NIP berspasi tetap disimpan
+  di kolom NIP untuk tampilan.
+- 113 guru ber-NIP sudah masuk lewat SQL (66 PNS, 39 PPPK, 8 PPPK PW). Mapel, pangkat, golongan,
+  keterangan ikut terisi. JK dan agama tidak ada di file, jadi kosong (boleh diisi lewat Edit).
+- 6 guru GTT-Outsourcing TIDAK punya NIP/NIK di file, jadi belum bisa dimasukkan. Tambahkan lewat
+  Aktivasi Pegawai -> + Tambah Pegawai setelah NIK-nya diketahui:
+  VERONICA FRANSILYA OKTAVIA, S.Pd | FATIMAH ISNAINI, S.Pd | RIZKI LAILATUL QOYUMAH, S.Pd |
+  AGUS RADIYANTO, S.Pd | MUH. KHOLIF IKDHA DAABI, S.Pd. | Adib Sobarkhah, S.Pd
+- Sheet jadwal, wali kelas, guru wali, DUK, dan pensiun belum dipakai.
+- Pasang: jalankan if0_43147052_e_library_pegawai_nik.sql (versi baru; lihat catatan di bagian
+  atas file bila versi lama sudah sempat dijalankan). Lokal: php artisan migrate lalu
+  php artisan db:seed --class=StaffSeeder

@@ -299,7 +299,7 @@
                         <div class="h-24 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
                             @if ($detail->book->cover)
                                 <img
-                                    src="{{ asset('storage/' . $detail->book->cover) }}"
+                                    src="{{ asset(str_starts_with($detail->book->cover, 'uploads/') ? $detail->book->cover : 'storage/' . $detail->book->cover) }}"
                                     alt="{{ $detail->book->title }}"
                                     class="h-full w-full object-cover"
                                 >

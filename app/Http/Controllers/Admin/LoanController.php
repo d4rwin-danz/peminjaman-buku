@@ -18,7 +18,8 @@ class LoanController extends Controller
         $status = $request->input('status');
 
         $loans = Loan::with([
-            'user',
+            'user.student',
+            'user.staff',
             'details.book',
         ])
 
@@ -27,10 +28,14 @@ class LoanController extends Controller
 
                 $query->where(function ($q) use ($search) {
 
-                    $q->whereHas('user', function ($userQuery) use ($search) {
+                    $q->where('loan_code', 'like', "%{$search}%");
+
+                    $q->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery
                             ->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('nis', 'like', "%{$search}%")
+                            ->orWhere('staff_number', 'like', "%{$search}%");
                     });
 
                     $q->orWhereHas('details.book', function ($bookQuery) use ($search) {
@@ -48,7 +53,8 @@ class LoanController extends Controller
                 $query->where('status', $status);
             })
 
-            ->latest()
+            // Pending / pengembalian menunggu / terlambat di atas, yang selesai di bawah.
+            ->priorityOrder()
             ->paginate(10)
             ->withQueryString();
 
@@ -80,12 +86,55 @@ class LoanController extends Controller
     }
 
     /**
+     * Halaman scan QR / input kode peminjaman.
+     * Bisa juga dipakai langsung: /admin/loans/scan?code=PJM-...
+     */
+    public function scan(Request $request)
+    {
+        if ($request->filled('code')) {
+            return $this->findByCode($request->input('code'));
+        }
+
+        return view('admin.loans.scan');
+    }
+
+    /**
+     * Mencari peminjaman berdasarkan kode lalu membuka detailnya.
+     */
+    public function findByCode(string $code)
+    {
+        // Ambil pola kode dari teks apa pun (kode polos atau URL hasil scan QR).
+        $code = strtoupper(trim($code));
+
+        if (preg_match('/PJM-\d{8}-[A-Z0-9]{6}/', $code, $match)) {
+            $code = $match[0];
+        }
+
+        $loan = Loan::where('loan_code', $code)->first();
+
+        if (!$loan) {
+            return redirect()
+                ->route('admin.loans.scan')
+                ->withInput(['code' => $code])
+                ->with(
+                    'error',
+                    "Kode peminjaman \"{$code}\" tidak ditemukan."
+                );
+        }
+
+        return redirect()->route('admin.loans.show', $loan);
+    }
+
+    /**
      * Detail peminjaman.
      */
     public function show(Loan $loan)
     {
+        $loan->ensureLoanCode();
+
         $loan->load([
-            'user',
+            'user.student',
+            'user.staff',
             'details.book.category',
         ]);
 
@@ -93,10 +142,22 @@ class LoanController extends Controller
     }
 
     /**
-     * Menyetujui peminjaman.
+     * Menyetujui peminjaman. Admin mencentang bahwa buku sudah diserahkan,
+     * lalu status langsung menjadi "borrowed" (tidak lagi berhenti di "approved").
      */
-    public function approve(Loan $loan)
+    public function approve(Request $request, Loan $loan)
     {
+        $redirect = $request->input('redirect_to') === 'dashboard'
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('admin.loans.show', $loan);
+
+        if (! $request->boolean('handed_over')) {
+            return $redirect->with(
+                'error',
+                'Centang "Buku sudah diserahkan kepada siswa" sebelum menyetujui.'
+            );
+        }
+
         try {
 
             DB::transaction(function () use ($loan) {
@@ -131,26 +192,27 @@ class LoanController extends Controller
                     );
                 }
 
+                // Masa pinjam dihitung sejak buku diserahkan, bukan sejak diajukan.
                 $loan->update([
-                    'status' => 'approved',
+                    'status' => 'borrowed',
+                    'loan_date' => now()->toDateString(),
+                    'due_date' => now()
+                        ->addDays(config('library.loan_duration_days', 7))
+                        ->toDateString(),
                 ]);
             });
 
-            return redirect()
-                ->route('admin.loans.show', $loan)
-                ->with(
-                    'success',
-                    'Peminjaman berhasil disetujui.'
-                );
+            return $redirect->with(
+                'success',
+                'Peminjaman disetujui dan langsung berstatus dipinjam.'
+            );
 
         } catch (\Throwable $e) {
 
-            return redirect()
-                ->route('admin.loans.show', $loan)
-                ->with(
-                    'error',
-                    $e->getMessage()
-                );
+            return $redirect->with(
+                'error',
+                $e->getMessage()
+            );
         }
     }
 

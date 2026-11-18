@@ -13,9 +13,6 @@
 
             <div>
 
-                <p class="text-sm font-semibold text-indigo-600">
-                    E-LIBRARY
-                </p>
 
                 <h1 class="mt-1 text-3xl font-bold text-slate-900">
                     Dashboard Siswa
@@ -26,7 +23,7 @@
                     <span class="font-semibold text-slate-700">
                         {{ $user->name }}
                     </span>
-                    👋
+                    
                 </p>
 
             </div>
@@ -36,7 +33,7 @@
                 href="{{ route('siswa.books.index') }}"
                 class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
             >
-                📚 Cari Buku
+                Cari Buku
             </a>
 
         </div>
@@ -50,10 +47,6 @@
         <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
 
             <div class="flex items-start gap-4">
-
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-xl">
-                    ⏳
-                </div>
 
                 <div>
 
@@ -75,7 +68,7 @@
                 href="{{ route('siswa.loans.index') }}"
                 class="text-sm font-bold text-amber-800 hover:text-amber-900"
             >
-                Lihat Peminjaman →
+                Lihat Peminjaman
             </a>
 
         </div>
@@ -84,10 +77,10 @@
 
 
     {{-- STATISTIK --}}
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-slate-200 ring-1 ring-slate-200 lg:grid-cols-4">
 
         {{-- BUKU TERSEDIA --}}
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="bg-white p-4 sm:p-6">
 
             <div class="flex items-start justify-between">
 
@@ -97,7 +90,7 @@
                         Buku Tersedia
                     </p>
 
-                    <h2 class="mt-2 text-3xl font-bold text-indigo-600">
+                    <h2 class="mt-2 font-display text-3xl font-semibold text-ink-900 tabular-nums">
                         {{ number_format($bukuTersedia) }}
                     </h2>
 
@@ -107,17 +100,13 @@
 
                 </div>
 
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-2xl">
-                    📚
                 </div>
-
-            </div>
 
         </div>
 
 
         {{-- SEDANG DIPINJAM --}}
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="bg-white p-4 sm:p-6">
 
             <div class="flex items-start justify-between">
 
@@ -127,7 +116,7 @@
                         Sedang Dipinjam
                     </p>
 
-                    <h2 class="mt-2 text-3xl font-bold text-orange-500">
+                    <h2 class="mt-2 font-display text-3xl font-semibold text-ink-900 tabular-nums">
                         {{ number_format($sedangDipinjam) }}
                     </h2>
 
@@ -137,17 +126,13 @@
 
                 </div>
 
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-2xl">
-                    📖
                 </div>
-
-            </div>
 
         </div>
 
 
         {{-- PENDING --}}
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="bg-white p-4 sm:p-6">
 
             <div class="flex items-start justify-between">
 
@@ -157,7 +142,7 @@
                         Menunggu
                     </p>
 
-                    <h2 class="mt-2 text-3xl font-bold text-amber-500">
+                    <h2 class="mt-2 font-display text-3xl font-semibold text-amber-700 tabular-nums">
                         {{ number_format($peminjamanPending) }}
                     </h2>
 
@@ -167,17 +152,13 @@
 
                 </div>
 
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-2xl">
-                    ⏳
                 </div>
-
-            </div>
 
         </div>
 
 
         {{-- RIWAYAT --}}
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="bg-white p-4 sm:p-6">
 
             <div class="flex items-start justify-between">
 
@@ -187,7 +168,7 @@
                         Riwayat
                     </p>
 
-                    <h2 class="mt-2 text-3xl font-bold text-green-600">
+                    <h2 class="mt-2 font-display text-3xl font-semibold text-ink-900 tabular-nums">
                         {{ number_format($riwayatPeminjaman) }}
                     </h2>
 
@@ -197,11 +178,7 @@
 
                 </div>
 
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-2xl">
-                    📋
                 </div>
-
-            </div>
 
         </div>
 
@@ -234,7 +211,7 @@
                     href="{{ route('siswa.loans.index') }}"
                     class="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
                 >
-                    Lihat semua →
+                    Lihat semua
                 </a>
 
             </div>
@@ -261,7 +238,7 @@
                                                 @if ($detail->book->cover)
 
                                                     <img
-                                                        src="{{ asset('storage/' . $detail->book->cover) }}"
+                                                        src="{{ asset(str_starts_with($detail->book->cover, 'uploads/') ? $detail->book->cover : 'storage/' . $detail->book->cover) }}"
                                                         alt="{{ $detail->book->title }}"
                                                         class="h-full w-full object-cover"
                                                     >
@@ -269,7 +246,7 @@
                                                 @else
 
                                                     <div class="flex h-full items-center justify-center">
-                                                        📚
+                                                        
                                                     </div>
 
                                                 @endif
@@ -301,7 +278,7 @@
                                 <div class="shrink-0 sm:text-right">
 
                                     <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                                        📖 Sedang Dipinjam
+                                        Sedang Dipinjam
                                     </span>
 
                                     <p class="mt-2 text-xs text-slate-400">
@@ -326,9 +303,7 @@
 
                 <div class="px-6 py-12 text-center">
 
-                    <div class="text-5xl">
-                        📖
-                    </div>
+                    <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
 
                     <h3 class="mt-3 font-bold text-slate-700">
                         Belum ada buku yang dipinjam
@@ -372,10 +347,6 @@
                     class="group flex items-center gap-4 rounded-xl border border-slate-200 p-4 transition hover:border-indigo-300 hover:bg-indigo-50"
                 >
 
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xl">
-                        📚
-                    </div>
-
                     <div>
 
                         <p class="font-semibold text-slate-800 group-hover:text-indigo-600">
@@ -396,10 +367,6 @@
                     href="{{ route('siswa.loans.index') }}"
                     class="group flex items-center gap-4 rounded-xl border border-slate-200 p-4 transition hover:border-blue-300 hover:bg-blue-50"
                 >
-
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-xl">
-                        📋
-                    </div>
 
                     <div>
 
@@ -426,9 +393,7 @@
 
                         <div class="flex items-center gap-3">
 
-                            <span class="text-xl">
-                                🔔
-                            </span>
+                            
 
                             <div>
 
@@ -481,7 +446,7 @@
                 href="{{ route('siswa.loans.index') }}"
                 class="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
             >
-                Lihat semua →
+                Lihat semua
             </a>
 
         </div>
@@ -529,7 +494,7 @@
                                 @foreach ($loan->details as $detail)
 
                                     <p class="text-sm text-slate-500">
-                                        📖 {{ $detail->book->title }}
+                                        {{ $detail->book->title }}
                                         <span class="text-slate-400">
                                             × {{ $detail->quantity }}
                                         </span>
@@ -564,9 +529,7 @@
 
             <div class="px-6 py-12 text-center">
 
-                <div class="text-5xl">
-                    📋
-                </div>
+                <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2.5Z"/><path d="M4 19.5A2 2 0 0 1 6 18h13"/></svg>
 
                 <p class="mt-3 font-semibold text-slate-700">
                     Belum ada aktivitas

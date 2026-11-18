@@ -50,23 +50,7 @@
     {{-- STATISTIK --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-        @php
-            $allLoans = \App\Models\Loan::where('user_id', auth()->id())->get();
 
-            $totalLoans = $allLoans->count();
-
-            $activeLoans = $allLoans
-                ->whereIn('status', ['approved', 'borrowed', 'return_pending'])
-                ->count();
-
-            $returnedLoans = $allLoans
-                ->where('status', 'returned')
-                ->count();
-
-            $pendingLoans = $allLoans
-                ->where('status', 'pending')
-                ->count();
-        @endphp
 
         {{-- TOTAL --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
@@ -91,7 +75,7 @@
 
                 <div>
                     <p class="text-sm text-gray-500">
-                        Total
+                        Total Peminjaman
                     </p>
 
                     <p class="text-2xl font-bold text-gray-900">
@@ -126,7 +110,7 @@
 
                 <div>
                     <p class="text-sm text-gray-500">
-                        Menunggu
+                        Menunggu Persetujuan
                     </p>
 
                     <p class="text-2xl font-bold text-gray-900">
@@ -161,7 +145,7 @@
 
                 <div>
                     <p class="text-sm text-gray-500">
-                        Aktif
+                        Belum Selesai
                     </p>
 
                     <p class="text-2xl font-bold text-gray-900">
@@ -196,7 +180,7 @@
 
                 <div>
                     <p class="text-sm text-gray-500">
-                        Selesai
+                        Sudah Dikembalikan
                     </p>
 
                     <p class="text-2xl font-bold text-gray-900">
@@ -441,6 +425,12 @@
                             </div>
 
 
+                            @if($loan->loan_code)
+                                <p class="mt-1 font-mono text-xs font-semibold tracking-wider text-gray-500">
+                                    {{ $loan->loan_code }}
+                                </p>
+                            @endif
+
                             {{-- BUKU --}}
                             <div class="mt-2 space-y-1">
 
@@ -466,19 +456,19 @@
                                         text-xs text-gray-500">
 
                                 <span>
-                                    📅 Pinjam:
+                                    Pinjam:
                                     {{ $loan->loan_date?->format('d M Y') }}
                                 </span>
 
                                 <span>
-                                    ⏰ Jatuh tempo:
+                                    Jatuh tempo:
                                     {{ $loan->due_date?->format('d M Y') }}
                                 </span>
 
                                 @if($loan->return_date)
 
                                     <span>
-                                        ✓ Kembali:
+                                        Kembali:
                                         {{ $loan->return_date->format('d M Y') }}
                                     </span>
 
@@ -502,7 +492,11 @@
                                   text-gray-700 font-semibold text-sm
                                   hover:bg-gray-50 transition">
 
-                            Lihat Detail
+                            @if($loan->status === 'rejected')
+                                Lihat Detail
+                            @else
+                                Lihat Invoice / QR
+                            @endif
                         </a>
 
 
@@ -535,7 +529,7 @@
                                          bg-green-50 text-green-700
                                          font-semibold text-sm">
 
-                                ✓ Selesai
+                                Selesai
                             </span>
 
                         @endif
